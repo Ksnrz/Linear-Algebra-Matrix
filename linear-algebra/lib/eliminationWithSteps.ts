@@ -10,6 +10,16 @@ export type EliminationResult = {
 };
 
 /**
+ * Format number to remove trailing .0000
+ */
+const formatNumber = (num: number, decimals: number = 4): string => {
+  const fixed = num.toFixed(decimals);
+  return parseFloat(fixed) === Math.floor(parseFloat(fixed))
+    ? Math.floor(parseFloat(fixed)).toString()
+    : fixed;
+};
+
+/**
  * Gaussian Elimination with Partial Pivoting - stops at Row Echelon Form (REF)
  * @param augmentedMatrix - The augmented matrix [A|b]
  * @returns Object containing final matrix and all steps with operations
@@ -59,7 +69,7 @@ export const gaussianEliminationWithDetailedSteps = (
       if (Math.abs(m[row][col]) < 1e-10) continue;
 
       const factor = m[row][col] / m[col][col];
-      const factorStr = factor.toFixed(4).replace(/\.?0+$/, "");
+      const factorStr = formatNumber(factor);
 
       for (let j = col; j < cols; j++) {
         m[row][j] -= factor * m[col][j];
@@ -135,7 +145,7 @@ export const gaussJordanWithDetailedSteps = (
     const pivotValue = m[currentRow][col];
     if (Math.abs(pivotValue - 1) > 1e-10) {
       const scaleFactor = 1 / pivotValue;
-      const scaleStr = scaleFactor.toFixed(4).replace(/\.?0+$/, "");
+      const scaleStr = formatNumber(scaleFactor);
 
       for (let j = 0; j < cols; j++) {
         m[currentRow][j] /= pivotValue;
@@ -162,7 +172,7 @@ export const gaussJordanWithDetailedSteps = (
       if (Math.abs(m[row][col]) < 1e-10) continue;
 
       const factor = m[row][col];
-      const factorStr = factor.toFixed(4).replace(/\.?0+$/, "");
+      const factorStr = formatNumber(factor);
 
       for (let j = 0; j < cols; j++) {
         m[row][j] -= factor * m[currentRow][j];

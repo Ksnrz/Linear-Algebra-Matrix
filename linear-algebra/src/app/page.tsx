@@ -16,6 +16,13 @@ const createMatrix = (size: number): number[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(0));
 };
 
+const formatNumber = (num: number): string => {
+  const fixed = num.toFixed(4);
+  return parseFloat(fixed) === Math.floor(parseFloat(fixed))
+    ? Math.floor(parseFloat(fixed)).toString()
+    : fixed.replace(/\.?0+$/, "");
+};
+
 const presets = [
   {
     title: "Example 1: 3x3 System",
@@ -176,7 +183,7 @@ export default function Home() {
                               <div className="flex gap-1 flex-wrap">
                                 {(step.data as number[]).map((val, i) => (
                                   <div key={i} className="inline">
-                                    [{val.toFixed(4)}]
+                                    [{formatNumber(val)}]
                                   </div>
                                 ))}
                               </div>
@@ -187,7 +194,7 @@ export default function Home() {
                                     <tr key={i}>
                                       {row.map((val, j) => (
                                         <td key={j} className="border border-slate-600 px-2 py-1 text-right">
-                                          {typeof val === "number" ? val.toFixed(4) : val}
+                                          {formatNumber(val)}
                                         </td>
                                       ))}
                                     </tr>
@@ -217,7 +224,7 @@ export default function Home() {
                               className="rounded border border-slate-600 bg-slate-950 px-3 py-2 text-right">
                               <p className="text-xs text-slate-400">x{i + 1}</p>
                               <p className="font-mono text-xl text-emerald-300 font-semibold">
-                                {val.toFixed(4)}
+                                {formatNumber(val)}
                               </p>
                             </div>
                           ))}
@@ -234,7 +241,7 @@ export default function Home() {
                                   <div key={i} className="font-mono text-xs text-emerald-300">
                                     {row.map((val, j) => (
                                       <span key={j} className="mr-3 inline-block w-12 text-right">
-                                        {val.toFixed(4)}
+                                        {formatNumber(val)}
                                       </span>
                                     ))}
                                   </div>
@@ -248,7 +255,7 @@ export default function Home() {
                                   <div key={i} className="font-mono text-xs text-emerald-300">
                                     {row.map((val, j) => (
                                       <span key={j} className="mr-3 inline-block w-12 text-right">
-                                        {val.toFixed(4)}
+                                        {formatNumber(val)}
                                       </span>
                                     ))}
                                   </div>
@@ -263,7 +270,7 @@ export default function Home() {
                                 <tr key={i}>
                                   {row.map((val, j) => (
                                     <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
-                                      {typeof val === 'number' ? val.toFixed(4) : val}
+                                      {formatNumber(val)}
                                     </td>
                                   ))}
                                 </tr>
