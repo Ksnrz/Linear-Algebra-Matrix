@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface MatrixInputProps {
     matrix: number[][];
@@ -10,17 +10,46 @@ interface MatrixInputProps {
 }
 
 export default function MatrixInput({ matrix, setMatrix, size, showB = false, bVector = [], setBVector }: MatrixInputProps) {
+    // Local string inputs to allow intermediate values like '-' or '1.' while typing
+    const [inputs, setInputs] = useState<string[][]>(() =>
+        matrix.map((row) => row.map((v) => (v === 0 ? '' : String(v))))
+    );
+
+    useEffect(() => {
+        setInputs(matrix.map((row) => row.map((v) => (v === 0 ? '' : String(v)))));
+    }, [matrix]);
+
     const handleInputChange = (row: number, col: number, value: string) => {
-        const newMatrix = matrix.map((r) => [...r]);
-        newMatrix[row][col] = value === '' ? 0 : parseFloat(value) || 0;
-        setMatrix(newMatrix);
+        const newInputs = inputs.map((r) => [...r]);
+        newInputs[row][col] = value;
+        setInputs(newInputs);
+
+        const parsed = parseFloat(value);
+        if (!Number.isNaN(parsed)) {
+            const newMatrix = matrix.map((r) => [...r]);
+            newMatrix[row][col] = parsed;
+            setMatrix(newMatrix);
+        }
+        // if parsed is NaN (e.g. '-' or ''), don't update numeric matrix yet
     };
 
+    const [bInputs, setBInputs] = useState<string[]>(() => (bVector || []).map((v) => (v === 0 ? '' : String(v))));
+
+    useEffect(() => {
+        setBInputs((bVector || []).map((v) => (v === 0 ? '' : String(v))));
+    }, [bVector]);
+
     const handleBChange = (row: number, value: string) => {
+        const newBInputs = [...bInputs];
+        newBInputs[row] = value;
+        setBInputs(newBInputs);
         if (!setBVector) return;
-        const newB = [...(bVector || [])];
-        newB[row] = value === '' ? 0 : parseFloat(value) || 0;
-        setBVector(newB);
+        const parsed = parseFloat(value);
+        if (!Number.isNaN(parsed)) {
+            const newB = [...(bVector || [])];
+            newB[row] = parsed;
+            setBVector(newB);
+        }
     };
 
     const columns = size + (showB ? 1 : 0);
@@ -39,7 +68,7 @@ export default function MatrixInput({ matrix, setMatrix, size, showB = false, bV
                                     type="text"
                                     inputMode="decimal"
                                     pattern="[0-9.+\-eE]*"
-                                    value={value === 0 && matrix[rowIndex][colIndex] === 0 ? '' : String(value)}
+                                    value={inputs[rowIndex]?.[colIndex] ?? ''}
                                     onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
                                     placeholder="0"
                                     className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none"
@@ -47,18 +76,15 @@ export default function MatrixInput({ matrix, setMatrix, size, showB = false, bV
                             ))}
 
                             {showB && (
-                                <div className="flex flex-col items-center">
-                                    <span className="text-xs text-slate-400 mb-1">b{rowIndex + 1}</span>
-                                    <input
-                                        type="text"
-                                        inputMode="decimal"
-                                        pattern="[0-9.+\-eE]*"
-                                        value={(bVector && bVector[rowIndex]) === 0 ? '' : String((bVector && bVector[rowIndex]) ?? '')}
-                                        onChange={(e) => handleBChange(rowIndex, e.target.value)}
-                                        placeholder="0"
-                                        className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none"
-                                    />
-                                </div>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    pattern="[0-9.+\-eE]*"
+                                    value={bInputs[rowIndex] ?? ''}
+                                    onChange={(e) => handleBChange(rowIndex, e.target.value)}
+                                    placeholder="0"
+                                    className="w-16 rounded-lg border border-amber-600 bg-amber-950 px-2 py-2 text-center text-amber-100 placeholder-amber-400 transition focus:border-amber-400 focus:outline-none"
+                                />
                             )}
                         </React.Fragment>
                     ))}

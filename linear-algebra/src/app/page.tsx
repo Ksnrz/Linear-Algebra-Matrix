@@ -91,8 +91,8 @@ export default function Home() {
                     onChange={(e) => setMethod(e.target.value)}
                     className="mt-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-slate-100 transition hover:border-emerald-300/40">
                     <option value="inverse">Inverse Matrix</option>
-                    <option value="gaussElim">Gaussian Elimination</option>
-                    <option value="gaussJordan">Gauss Jordan</option>
+                    <option value="gaussElim">Gauss Elimination Pivoting</option>
+                    <option value="gaussJordan">Gauss Jordan Elimination</option>
                     <option value="lu">LU Factorization</option>
                     <option value="cramer">Cramer's rule</option>
                   </select>
@@ -111,7 +111,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-6">
-                <MatrixInput matrix={matrix} setMatrix={setMatrix} size={size} showB={method === 'gaussElim' || method === 'cramer'} bVector={bVector} setBVector={setBVector} />
+                <MatrixInput matrix={matrix} setMatrix={setMatrix} size={size} showB={method === 'gaussElim' || method === 'cramer' || method === 'lu' || method === 'gaussJordan'} bVector={bVector} setBVector={setBVector} />
               </div>
 
               <button
@@ -128,7 +128,7 @@ export default function Home() {
 
               {result && (
                 <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
-                  <h3 className="mb-4 text-sm font-semibold text-emerald-400">Result:</h3>
+                  <h3 className="mb-4 text-lg font-semibold text-emerald-400">Result:</h3>
                   <div className="overflow-x-auto">
                     {Array.isArray(result) && result.length > 0 && typeof result[0] === 'number' ? (
                       <div>
@@ -139,8 +139,8 @@ export default function Home() {
                               key={i}
                               className="rounded border border-slate-600 bg-slate-950 px-3 py-2 text-right">
                               <p className="text-xs text-slate-400">x{i + 1}</p>
-                              <p className="font-mono text-sm text-emerald-300">
-                                {val.toFixed(6)}
+                              <p className="font-mono text-xl text-emerald-300 font-semibold">
+                                {val.toFixed(4)}
                               </p>
                             </div>
                           ))}
@@ -186,7 +186,7 @@ export default function Home() {
                                 <tr key={i}>
                                   {row.map((val, j) => (
                                     <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
-                                      {typeof val === 'number' ? val.toFixed(6) : val}
+                                      {typeof val === 'number' ? val.toFixed(4) : val}
                                     </td>
                                   ))}
                                 </tr>
