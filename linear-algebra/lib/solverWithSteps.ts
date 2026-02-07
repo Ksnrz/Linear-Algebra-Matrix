@@ -13,11 +13,19 @@ import {
   extractSolutionFromREF,
   type EliminationStep,
 } from "./eliminationWithSteps";
+import {
+  gaussianEliminationWithFractions,
+  gaussJordanWithFractions,
+  extractSolutionFromRREFFractions,
+  extractSolutionFromREFFractions,
+  type FractionEliminationStep,
+} from "./fractionElimination";
+import { Fraction, type FractionMatrix } from "./fractions";
 
 export type Step = {
   title: string;
   description: string;
-  data?: Matrix | number[];
+  data?: Matrix | number[] | FractionMatrix | Fraction[];
 };
 
 export type SolverResult = {
@@ -30,16 +38,16 @@ export const gaussianEliminationWithSteps = (
   b: number[]
 ): SolverResult => {
   // Create augmented matrix [A|b]
-  const augmented = A.map((row, i) => [...row, b[i]]);
+  const augmented: (number | Fraction)[][] = A.map((row, i) => [...row, b[i]]);
 
-  // Use detailed elimination function
-  const { result: refMatrix, steps: elimSteps } = gaussianEliminationWithDetailedSteps(augmented);
+  // Use fraction-based elimination function
+  const { result: refMatrix, steps: elimSteps } = gaussianEliminationWithFractions(augmented);
 
   // Extract solution via back substitution
-  const solution = extractSolutionFromREF(refMatrix);
+  const solution = extractSolutionFromREFFractions(refMatrix);
 
   // Convert elimination steps to Step format
-  const steps: Step[] = elimSteps.map((elimStep: EliminationStep) => ({
+  const steps: Step[] = elimSteps.map((elimStep: FractionEliminationStep) => ({
     title: elimStep.operation,
     description: elimStep.description,
     data: elimStep.matrix,
@@ -60,16 +68,16 @@ export const gaussJordanWithSteps = (
   b?: number[]
 ): SolverResult => {
   // Create augmented matrix [A|b]
-  const augmented = A.map((row, i) => (b ? [...row, b[i]] : [...row, 0]));
+  const augmented: (number | Fraction)[][] = A.map((row, i) => (b ? [...row, b[i]] : [...row, 0]));
 
-  // Use detailed elimination function
-  const { result: rrefMatrix, steps: elimSteps } = gaussJordanWithDetailedSteps(augmented);
+  // Use fraction-based elimination function
+  const { result: rrefMatrix, steps: elimSteps } = gaussJordanWithFractions(augmented);
 
   // Extract solution from RREF (last column)
-  const solution = extractSolutionFromRREF(rrefMatrix);
+  const solution = extractSolutionFromRREFFractions(rrefMatrix);
 
   // Convert elimination steps to Step format
-  const steps: Step[] = elimSteps.map((elimStep: EliminationStep) => ({
+  const steps: Step[] = elimSteps.map((elimStep: FractionEliminationStep) => ({
     title: elimStep.operation,
     description: elimStep.description,
     data: elimStep.matrix,

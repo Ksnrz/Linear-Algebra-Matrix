@@ -11,12 +11,16 @@ import {
   type Step,
   type SolverResult,
 } from "../../lib/solverWithSteps";
+import { Fraction, type FractionMatrix } from "../../lib/fractions";
 
 const createMatrix = (size: number): number[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(0));
 };
 
-const formatNumber = (num: number): string => {
+const formatNumber = (num: number | Fraction): string => {
+  if (num instanceof Fraction) {
+    return num.toString();
+  }
   const fixed = num.toFixed(4);
   return parseFloat(fixed) === Math.floor(parseFloat(fixed))
     ? Math.floor(parseFloat(fixed)).toString()
@@ -151,7 +155,7 @@ export default function Home() {
 
               <button
                 onClick={handleClear}
-                className="mt-2 w-full rounded-lg bg-slate-700 px-6 py-3 font-semibold text-white transition hover:bg-slate-600 active:scale-95">
+                className="w-full rounded-lg bg-slate-700 px-6 py-3 font-semibold text-white transition hover:bg-slate-600 active:scale-95">
                 Clear
               </button>
 
@@ -187,10 +191,23 @@ export default function Home() {
                                   </div>
                                 ))}
                               </div>
-                            ) : Array.isArray(step.data) ? (
+                            ) : Array.isArray(step.data) && step.data.length > 0 && step.data[0] instanceof Fraction ? (
+                              <div>
+                                {step.data[0] instanceof Fraction ? (
+                                  // This is a Fraction[]
+                                  <div className="flex gap-1 flex-wrap">
+                                    {(step.data as Fraction[]).map((val, i) => (
+                                      <div key={i} className="inline">
+                                        [{formatNumber(val)}]
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </div>
+                            ) : Array.isArray(step.data) && Array.isArray(step.data[0]) ? (
                               <table className="w-full border-collapse">
                                 <tbody>
-                                  {(step.data as Matrix).map((row, i) => (
+                                  {(step.data as any[][]).map((row, i) => (
                                     <tr key={i}>
                                       {row.map((val, j) => (
                                         <td key={j} className="border border-slate-600 px-2 py-1 text-right">
@@ -214,11 +231,11 @@ export default function Home() {
                 <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
                   <h3 className="mb-4 text-lg font-semibold text-emerald-400">Result:</h3>
                   <div className="overflow-x-auto">
-                    {Array.isArray(result) && result.length > 0 && typeof result[0] === 'number' ? (
+                    {Array.isArray(result) && result.length > 0 && (typeof result[0] === 'number' || result[0] instanceof Fraction) ? (
                       <div>
                         <p className="mb-2 text-xs text-slate-400">Solution Vector:</p>
                         <div className="flex flex-wrap gap-2">
-                          {(result as number[]).map((val, i) => (
+                          {(result as any[]).map((val, i) => (
                             <div
                               key={i}
                               className="rounded border border-slate-600 bg-slate-950 px-3 py-2 text-right">
