@@ -1,5 +1,10 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import MatrixInput from "../../components/MatrixInput";
+
+const createMatrix = (size: number): number[][] => {
+  return Array(size).fill(null).map(() => Array(size).fill(0));
+};
 
 const presets = [
   {
@@ -22,6 +27,12 @@ const presets = [
 
 export default function Home() {
   const [method, setMethod] = useState("inverse");
+  const [size, setSize] = useState(3);
+  const [matrix, setMatrix] = useState(createMatrix(3));
+
+  useEffect(() => {
+    setMatrix(createMatrix(size));
+  }, [size]);
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -33,18 +44,35 @@ export default function Home() {
               <p className="text-sm text-slate-300">
                 Add your matrix inputs and select a method to solve
               </p>
-              <div>
-                <label className="text-sm text-slate-300">Method</label>
-                <select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value)}
-                  className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-slate-100 transition hover:border-emerald-300/40">
-                  <option value="inverse">Inverse Matrix</option>
-                  <option value="gaussElim">Gaussian Elimination</option>
-                  <option value="gaussJordan">Gauss Jordan</option>
-                  <option value="lu">LU Factorization</option>
-                  <option value="cramer">Cramer's rule</option>
-                </select>
+              <div className="flex gap-4">
+                <div>
+                  <label className="text-md text-slate-300 mr-3">Method</label>
+                  <select
+                    value={method}
+                    onChange={(e) => setMethod(e.target.value)}
+                    className="mt-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-slate-100 transition hover:border-emerald-300/40">
+                    <option value="inverse">Inverse Matrix</option>
+                    <option value="gaussElim">Gaussian Elimination</option>
+                    <option value="gaussJordan">Gauss Jordan</option>
+                    <option value="lu">LU Factorization</option>
+                    <option value="cramer">Cramer's rule</option>
+                  </select>
+                </div>
+                <div>
+                  <label className='text-md text-slate-300 mr-3'>Matrix size</label>
+                  <select
+                    value={size}
+                    onChange={(e) => setSize(Number(e.target.value))}
+                    className="mt-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-slate-100 transition hover:border-emerald-300/40">
+                    <option value="2">2x2</option>
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                    <option value="5">5x5</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-6">
+                <MatrixInput matrix={matrix} setMatrix={setMatrix} size={size} />
               </div>
             </div>
           </div>
@@ -59,8 +87,7 @@ export default function Home() {
                 {presets.map((preset) => (
                   <button
                     key={preset.title}
-                    className="rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-left text-sm text-slate-200 transition hover:border-emerald-300/40 hover:bg-slate-900/80"
-                  >
+                    className="rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-left text-sm text-slate-200 transition hover:border-emerald-300/40 hover:bg-slate-900/80">
                     <p className="font-medium">{preset.title}</p>
                     <p className="mt-1 text-xs text-slate-400">
                       {preset.description}
@@ -72,6 +99,7 @@ export default function Home() {
           </aside>
         </section>
       </div>
+
     </main>
   );
 }
