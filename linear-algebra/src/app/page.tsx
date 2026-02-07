@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from "react";
 import MatrixInput from "../../components/MatrixInput";
+import { inverseMatrix, gaussianElimination, gaussJordan, luFactorization, cramersRule, type Matrix } from "../../lib/matrixUtils";
 
 const createMatrix = (size: number): number[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(0));
@@ -29,10 +30,48 @@ export default function Home() {
   const [method, setMethod] = useState("inverse");
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState(createMatrix(3));
+  const [bVector, setBVector] = useState<number[]>([0, 0, 0]);
+  const [result, setResult] = useState<Matrix | number[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setMatrix(createMatrix(size));
+    setBVector(Array(size).fill(0));
   }, [size]);
+
+  const handleSolve = () => {
+    setError(null);
+    try {
+      let solveResult: Matrix | number[];
+
+      switch (method) {
+        case "inverse":
+          solveResult = inverseMatrix(matrix);
+          break;
+        case "gaussElim":
+          solveResult = gaussianElimination(matrix, bVector);
+          break;
+        case "gaussJordan":
+          const rref = gaussJordan(matrix, bVector);
+          solveResult = rref;
+          break;
+        case "lu":
+          const { L, U } = luFactorization(matrix);
+          solveResult = { L, U } as any;
+          break;
+        case "cramer":
+          solveResult = cramersRule(matrix, bVector);
+          break;
+        default:
+          solveResult = [];
+      }
+
+      setResult(solveResult);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setResult(null);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
@@ -74,6 +113,116 @@ export default function Home() {
               <div className="mt-6">
                 <MatrixInput matrix={matrix} setMatrix={setMatrix} size={size} />
               </div>
+
+              {(method === "gaussElim" || method === "cramer") && (
+                <div className="mt-6">
+                  <label className="text-sm text-slate-300">Vector b</label>
+                  <div className="flex gap-2 mt-2">
+                    {bVector.map((val, idx) => (
+                      <input
+                        key={idx}
+                        type="number"
+                        step="0.1"
+                        value={val === 0 ? '' : val}
+                        onChange={(e) => {
+                          const newB = [...bVector];
+                          newB[idx] = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                          setBVector(newB);
+                        }}
+                        placeholder="0"
+                        className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        style={{ MozAppearance: 'textfield' }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleSolve}
+                className="mt-6 w-full rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700 active:scale-95">
+                Solve
+              </button>
+
+              {error && (
+                <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 p-4 text-red-400">
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+
+              {result && (
+                <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
+                  <h3 className="mb-4 text-sm font-semibold text-emerald-400">Result:</h3>
+                  <div className="overflow-x-auto">
+                    {Array.isArray(result) && result.length > 0 && typeof result[0] === 'number' ? (
+                      <div>
+                        <p className="mb-2 text-xs text-slate-400">Solution Vector:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(result as number[]).map((val, i) => (
+                            <div
+                              key={i}
+                              className="rounded border border-slate-600 bg-slate-950 px-3 py-2 text-right">
+                              <p className="text-xs text-slate-400">x{i + 1}</p>
+                              <p className="font-mono text-sm text-emerald-300">
+                                {val.toFixed(6)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        {typeof result === 'object' && 'L' in result ? (
+                          <div>
+                            <div className="mb-4">
+                              <p className="mb-2 text-xs text-slate-400">Lower Triangular (L):</p>
+                              <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
+                                {(result.L as Matrix).map((row, i) => (
+                                  <div key={i} className="font-mono text-xs text-emerald-300">
+                                    {row.map((val, j) => (
+                                      <span key={j} className="mr-3 inline-block w-12 text-right">
+                                        {val.toFixed(4)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="mb-2 text-xs text-slate-400">Upper Triangular (U):</p>
+                              <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
+                                {(result.U as Matrix).map((row, i) => (
+                                  <div key={i} className="font-mono text-xs text-emerald-300">
+                                    {row.map((val, j) => (
+                                      <span key={j} className="mr-3 inline-block w-12 text-right">
+                                        {val.toFixed(4)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <table className="w-full border-collapse text-xs">
+                            <tbody>
+                              {(result as Matrix).map((row, i) => (
+                                <tr key={i}>
+                                  {row.map((val, j) => (
+                                    <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
+                                      {typeof val === 'number' ? val.toFixed(6) : val}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

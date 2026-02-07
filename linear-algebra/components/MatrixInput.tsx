@@ -26,8 +26,9 @@ export default function MatrixInput({ matrix, setMatrix, size }: MatrixInputProp
                                 step="1"
                                 value={value === 0 && matrix[rowIndex][colIndex] === 0 ? '' : value}
                                 onChange={(e) => handleInputChange(rowIndex, colIndex, e.target.value)}
-                                placeholder=""
-                                className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none"
+                                placeholder="0"
+                                className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                style={{ MozAppearance: 'textfield' }}
                             />
                         ))
                     )}
