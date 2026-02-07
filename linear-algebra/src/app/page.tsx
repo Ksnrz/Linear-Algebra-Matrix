@@ -117,22 +117,24 @@ export default function Home() {
               {(method === "gaussElim" || method === "cramer") && (
                 <div className="mt-6">
                   <label className="text-sm text-slate-300">Vector b</label>
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-3 mt-2 flex-wrap">
                     {bVector.map((val, idx) => (
-                      <input
-                        key={idx}
-                        type="number"
-                        step="0.1"
-                        value={val === 0 ? '' : val}
-                        onChange={(e) => {
-                          const newB = [...bVector];
-                          newB[idx] = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
-                          setBVector(newB);
-                        }}
-                        placeholder="0"
-                        className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        style={{ MozAppearance: 'textfield' }}
-                      />
+                      <div key={idx} className="flex flex-col items-center">
+                        <span className="text-xs text-slate-400 mb-1">b{idx + 1}</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={val === 0 ? '' : val}
+                          onChange={(e) => {
+                            const newB = [...bVector];
+                            newB[idx] = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                            setBVector(newB);
+                          }}
+                          placeholder="0"
+                          className="w-16 rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-center text-slate-100 placeholder-slate-500 transition focus:border-emerald-400 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          style={{ MozAppearance: 'textfield' }}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
