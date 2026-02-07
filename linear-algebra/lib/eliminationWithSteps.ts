@@ -16,7 +16,7 @@ const formatNumber = (num: number, decimals: number = 4): string => {
   const fixed = num.toFixed(decimals);
   return parseFloat(fixed) === Math.floor(parseFloat(fixed))
     ? Math.floor(parseFloat(fixed)).toString()
-    : fixed;
+    : fixed.replace(/\.?0+$/, "");
 };
 
 /**
