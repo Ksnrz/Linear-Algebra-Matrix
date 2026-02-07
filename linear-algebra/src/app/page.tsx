@@ -51,7 +51,7 @@ export default function Home() {
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState(createMatrix(3));
   const [bVector, setBVector] = useState<number[]>([0, 0, 0]);
-  const [result, setResult] = useState<Matrix | number[] | null>(null);
+  const [result, setResult] = useState<Matrix | number[] | { L: Matrix; U: Matrix } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [showSteps, setShowSteps] = useState(false);
@@ -247,55 +247,51 @@ export default function Home() {
                           ))}
                         </div>
                       </div>
-                    ) : (
+                    ) : typeof result === 'object' && result !== null && 'L' in result && 'U' in result ? (
                       <div>
-                        {typeof result === 'object' && 'L' in result ? (
-                          <div>
-                            <div className="mb-4">
-                              <p className="mb-2 text-xs text-slate-400">Lower Triangular (L):</p>
-                              <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
-                                {(result.L as Matrix).map((row, i) => (
-                                  <div key={i} className="font-mono text-xs text-emerald-300">
-                                    {row.map((val, j) => (
-                                      <span key={j} className="mr-3 inline-block w-12 text-right">
-                                        {formatNumber(val)}
-                                      </span>
-                                    ))}
-                                  </div>
+                        <div className="mb-4">
+                          <p className="mb-2 text-xs text-slate-400">Lower Triangular (L):</p>
+                          <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
+                            {(result.L as Matrix).map((row, i) => (
+                              <div key={i} className="font-mono text-xs text-emerald-300">
+                                {row.map((val, j) => (
+                                  <span key={j} className="mr-3 inline-block w-12 text-right">
+                                    {formatNumber(val)}
+                                  </span>
                                 ))}
                               </div>
-                            </div>
-                            <div>
-                              <p className="mb-2 text-xs text-slate-400">Upper Triangular (U):</p>
-                              <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
-                                {(result.U as Matrix).map((row, i) => (
-                                  <div key={i} className="font-mono text-xs text-emerald-300">
-                                    {row.map((val, j) => (
-                                      <span key={j} className="mr-3 inline-block w-12 text-right">
-                                        {formatNumber(val)}
-                                      </span>
-                                    ))}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
+                            ))}
                           </div>
-                        ) : (
-                          <table className="w-full border-collapse text-xs">
-                            <tbody>
-                              {(result as Matrix).map((row, i) => (
-                                <tr key={i}>
-                                  {row.map((val, j) => (
-                                    <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
-                                      {formatNumber(val)}
-                                    </td>
-                                  ))}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
+                        </div>
+                        <div>
+                          <p className="mb-2 text-xs text-slate-400">Upper Triangular (U):</p>
+                          <div className="inline-block rounded border border-slate-600 bg-slate-950 p-3">
+                            {(result.U as Matrix).map((row, i) => (
+                              <div key={i} className="font-mono text-xs text-emerald-300">
+                                {row.map((val, j) => (
+                                  <span key={j} className="mr-3 inline-block w-12 text-right">
+                                    {formatNumber(val)}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
+                    ) : (
+                      <table className="w-full border-collapse text-xs">
+                        <tbody>
+                          {(result as Matrix).map((row, i) => (
+                            <tr key={i}>
+                              {row.map((val, j) => (
+                                <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
+                                  {formatNumber(val)}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     )}
                   </div>
                 </div>
