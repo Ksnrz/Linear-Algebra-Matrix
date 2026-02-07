@@ -1,7 +1,16 @@
 'use client';
 import { useState, useEffect } from "react";
 import MatrixInput from "../../components/MatrixInput";
-import { inverseMatrix, gaussianElimination, gaussJordan, luFactorization, cramersRule, type Matrix } from "../../lib/matrixUtils";
+import { type Matrix } from "../../lib/matrixUtils";
+import {
+  gaussianEliminationWithSteps,
+  gaussJordanWithSteps,
+  luFactorizationWithSteps,
+  cramersRuleWithSteps,
+  inverseMatrixWithSteps,
+  type Step,
+  type SolverResult,
+} from "../../lib/solverWithSteps";
 
 const createMatrix = (size: number): number[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(0));
@@ -33,6 +42,8 @@ export default function Home() {
   const [bVector, setBVector] = useState<number[]>([0, 0, 0]);
   const [result, setResult] = useState<Matrix | number[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [showSteps, setShowSteps] = useState(false);
 
   useEffect(() => {
     setMatrix(createMatrix(size));
@@ -41,36 +52,47 @@ export default function Home() {
 
   const handleSolve = () => {
     setError(null);
+    setSteps([]);
+    setShowSteps(false);
     try {
-      let solveResult: Matrix | number[];
+      let solverResult: SolverResult;
 
       switch (method) {
         case "inverse":
-          solveResult = inverseMatrix(matrix);
+          solverResult = inverseMatrixWithSteps(matrix);
           break;
         case "gaussElim":
-          solveResult = gaussianElimination(matrix, bVector);
+          solverResult = gaussianEliminationWithSteps(matrix, bVector);
           break;
         case "gaussJordan":
-          const rref = gaussJordan(matrix, bVector);
-          solveResult = rref;
+          solverResult = gaussJordanWithSteps(matrix, bVector);
           break;
         case "lu":
-          const { L, U } = luFactorization(matrix);
-          solveResult = { L, U } as any;
+          solverResult = luFactorizationWithSteps(matrix, bVector);
           break;
         case "cramer":
-          solveResult = cramersRule(matrix, bVector);
+          solverResult = cramersRuleWithSteps(matrix, bVector);
           break;
         default:
-          solveResult = [];
+          solverResult = { result: [], steps: [] };
       }
 
-      setResult(solveResult);
+      setResult(solverResult.result);
+      setSteps(solverResult.steps);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setResult(null);
+      setSteps([]);
     }
+  };
+
+  const handleClear = () => {
+    setMatrix(createMatrix(size));
+    setBVector(Array(size).fill(0));
+    setResult(null);
+    setError(null);
+    setSteps([]);
+    setShowSteps(false);
   };
 
   return (
@@ -120,9 +142,64 @@ export default function Home() {
                 Solve
               </button>
 
+              <button
+                onClick={handleClear}
+                className="mt-2 w-full rounded-lg bg-slate-700 px-6 py-3 font-semibold text-white transition hover:bg-slate-600 active:scale-95">
+                Clear
+              </button>
+
               {error && (
                 <div className="mt-4 rounded-lg border border-red-500 bg-red-500/10 p-4 text-red-400">
                   <p className="text-sm">{error}</p>
+                </div>
+              )}
+
+              {steps.length > 0 && (
+                <button
+                  onClick={() => setShowSteps(!showSteps)}
+                  className="mt-4 w-full rounded-lg bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 active:scale-95">
+                  {showSteps ? "Hide Steps" : "Show Steps"}
+                </button>
+              )}
+
+              {showSteps && steps.length > 0 && (
+                <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900/50 p-4">
+                  <h3 className="mb-4 text-lg font-semibold text-cyan-400">Solution Steps:</h3>
+                  <div className="flex flex-col gap-3">
+                    {steps.map((step, idx) => (
+                      <div key={idx} className="rounded-lg border border-slate-700 bg-slate-950/50 p-4">
+                        <p className="mb-2 font-medium text-cyan-300">{step.title}</p>
+                        <p className="mb-3 text-sm text-slate-300">{step.description}</p>
+                        {step.data && (
+                          <div className="rounded bg-slate-950 p-3 overflow-x-auto text-xs font-mono text-emerald-300">
+                            {Array.isArray(step.data) && step.data.length > 0 && typeof step.data[0] === "number" ? (
+                              <div className="flex gap-1 flex-wrap">
+                                {(step.data as number[]).map((val, i) => (
+                                  <div key={i} className="inline">
+                                    [{val.toFixed(4)}]
+                                  </div>
+                                ))}
+                              </div>
+                            ) : Array.isArray(step.data) ? (
+                              <table className="w-full border-collapse">
+                                <tbody>
+                                  {(step.data as Matrix).map((row, i) => (
+                                    <tr key={i}>
+                                      {row.map((val, j) => (
+                                        <td key={j} className="border border-slate-600 px-2 py-1 text-right">
+                                          {typeof val === "number" ? val.toFixed(4) : val}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

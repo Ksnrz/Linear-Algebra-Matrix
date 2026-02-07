@@ -6,6 +6,13 @@ import {
   cramersRule,
   type Matrix,
 } from "./matrixUtils";
+import {
+  gaussianEliminationWithDetailedSteps,
+  gaussJordanWithDetailedSteps,
+  extractSolutionFromRREF,
+  extractSolutionFromREF,
+  type EliminationStep,
+} from "./eliminationWithSteps";
 
 export type Step = {
   title: string;
@@ -22,67 +29,73 @@ export const gaussianEliminationWithSteps = (
   A: Matrix,
   b: number[]
 ): SolverResult => {
-  const steps: Step[] = [];
-  const n = A.length;
-  const M = A.map((row, i) => [...row, b[i]]);
+  // Create augmented matrix [A|b]
+  const augmented = A.map((row, i) => [...row, b[i]]);
 
+  // Use detailed elimination function
+  const { result: refMatrix, steps: elimSteps } = gaussianEliminationWithDetailedSteps(augmented);
+
+  // Extract solution via back substitution
+  const solution = extractSolutionFromREF(refMatrix);
+
+  // Convert elimination steps to Step format
+  const steps: Step[] = elimSteps.map((elimStep: EliminationStep) => ({
+    title: elimStep.operation,
+    description: elimStep.description,
+    data: elimStep.matrix,
+  }));
+
+  // Add final solution step
   steps.push({
-    title: "Step 1: Initial Augmented Matrix [A|b]",
-    description: "Starting with the augmented matrix",
-    data: M,
+    title: "Solution",
+    description: "Back substitution complete - final solution",
+    data: solution,
   });
 
-  // Call the original function
-  const result = gaussianElimination(A, b);
-
-  steps.push({
-    title: `Step ${n + 2}: Back Substitution Complete`,
-    description: "Solved using back substitution",
-    data: result,
-  });
-
-  return { result, steps };
+  return { result: solution, steps };
 };
 
 export const gaussJordanWithSteps = (
   A: Matrix,
   b?: number[]
 ): SolverResult => {
-  const steps: Step[] = [];
+  // Create augmented matrix [A|b]
+  const augmented = A.map((row, i) => (b ? [...row, b[i]] : [...row, 0]));
 
-  if (b) {
-    const M = A.map((row, i) => [...row, b[i]]);
-    steps.push({
-      title: "Step 1: Initial Augmented Matrix [A|b]",
-      description: "Starting with augmented matrix",
-      data: M,
-    });
-  } else {
-    steps.push({
-      title: "Step 1: Initial Matrix A",
-      description: "Starting matrix",
-      data: A,
-    });
-  }
+  // Use detailed elimination function
+  const { result: rrefMatrix, steps: elimSteps } = gaussJordanWithDetailedSteps(augmented);
 
-  const result = gaussJordan(A, b);
+  // Extract solution from RREF (last column)
+  const solution = extractSolutionFromRREF(rrefMatrix);
 
+  // Convert elimination steps to Step format
+  const steps: Step[] = elimSteps.map((elimStep: EliminationStep) => ({
+    title: elimStep.operation,
+    description: elimStep.description,
+    data: elimStep.matrix,
+  }));
+
+  // Add final solution step
   steps.push({
-    title: `Step 2: Reduced Row Echelon Form (RREF)`,
-    description: "Final reduced row echelon form",
-    data: result,
+    title: "Solution",
+    description: "Gauss-Jordan elimination complete - solution extracted from RREF",
+    data: solution,
   });
 
-  return { result, steps };
+  return { result: solution, steps };
 };
 
-export const luFactorizationWithSteps = (A: Matrix): SolverResult => {
+export const luFactorizationWithSteps = (
+  A: Matrix,
+  b: number[]
+): SolverResult => {
   const steps: Step[] = [];
+  const n = A.length;
 
   steps.push({
-    title: "Step 1: Initial Matrix",
-    description: "Starting matrix A",
-    data: A,
+    title: "Step 1: Initial Matrix A and Vector b",
+    description: "Starting with matrix A and vector b",
+    data: A.map((row, i) => [...row, b[i]]),
   });
 
   const { L, U } = luFactorization(A);
@@ -99,10 +112,39 @@ export const luFactorizationWithSteps = (A: Matrix): SolverResult => {
     data: U,
   });
 
-  return {
-    result: { L, U },
-    steps,
-  };
+  // Forward substitution: Ly = b
+  const y: number[] = Array(n).fill(0);
+  for (let i = 0; i < n; i++) {
+    let sum = 0;
+    for (let j = 0; j < i; j++) {
+      sum += L[i][j] * y[j];
+    }
+    y[i] = (b[i] - sum) / L[i][i];
+  }
+
+  steps.push({
+    title: "Step 4: Forward Substitution (Ly = b)",
+    description: "Solving Ly = b gives y vector",
+    data: y,
+  });
+
+  // Back substitution: Ux = y
+  const x: number[] = Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = 0;
+    for (let j = i + 1; j < n; j++) {
+      sum += U[i][j] * x[j];
+    }
+    x[i] = (y[i] - sum) / U[i][i];
+  }
+
+  steps.push({
+    title: "Step 5: Back Substitution (Ux = y)",
+    description: "Solving Ux = y gives solution x",
+    data: x,
+  });
+
+  return { result: x, steps };
 };
 
 export const cramersRuleWithSteps = (
