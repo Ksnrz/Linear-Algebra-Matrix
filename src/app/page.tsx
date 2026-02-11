@@ -102,6 +102,24 @@ export default function Home() {
     setBVector(Array(size).fill(0));
   }, [size]);
 
+  const applyPreset = (preset: Preset) => {
+    setMethod(preset.method);
+    setSize(preset.size);
+    setMatrix(preset.matrix.map(row => [...row]));
+    setBVector(preset.bVector ? [...preset.bVector] : Array(preset.size).fill(0));
+    setResult(null);
+    setError(null);
+    setSteps([]);
+    setShowSteps(false);
+  }
+
+  const onSizeChange = (newSize: number) => {
+    setSize(newSize);
+    setMatrix(createMatrix(newSize));
+    setBVector(Array(newSize).fill(0));
+    setError(null);
+  };
+
   const handleSolve = () => {
     setError(null);
     setSteps([]);
@@ -350,6 +368,7 @@ export default function Home() {
                 {presets.map((preset) => (
                   <button
                     key={preset.title}
+                    onClick={() => applyPreset(preset)}
                     className="rounded-2xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-left text-sm text-slate-200 transition hover:border-emerald-300/40 hover:bg-slate-900/80">
                     <p className="font-medium">{preset.title}</p>
                     <p className="mt-1 text-xs text-slate-400">
