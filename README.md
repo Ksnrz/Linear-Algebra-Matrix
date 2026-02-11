@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Linear Algebra Matrix Solver
 
-## Getting Started
+เว็บแอปสำหรับคำนวณและแก้ระบบสมการเชิงเส้นหลายวิธีในที่เดียว
+โปรเจกต์นี้เป็นเว็บแอปสำหรับ **คำนวณเมทริกซ์และแก้ระบบสมการเชิงเส้น** ด้วยวิธีต่าง ๆ ในพีชคณิตเชิงเส้น ผู้ใช้สามารถเลือกวิธีคำนวณ ปรับขนาดเมทริกซ์ และใส่ค่าด้วยตัวเองได้ผ่านหน้าเว็บ เหมาะสำหรับใช้ฝึกทำโจทย์หรือใช้เป็นเครื่องมือช่วยเรียนวิชา Linear Algebra
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ฟีเจอร์หลัก
+
+### 1. รองรับหลายวิธีในการแก้ระบบสมการ
+
+ภายในเว็บมีวิธีคำนวณที่สำคัญในพีชคณิตเชิงเส้นให้เลือกใช้งาน ได้แก่
+
+* Inverse Matrix (หาเมทริกซ์ผกผัน)
+* Gauss Elimination
+* Pivoting
+* Gauss–Jordan Elimination
+* LU Factorization
+* Cramer’s Rule
+
+ผู้ใช้สามารถสลับวิธีการคำนวณได้ตามต้องการ เพื่อเปรียบเทียบผลลัพธ์หรือใช้ตามโจทย์ที่กำหนด
+
+---
+
+### 2. เลือกขนาดเมทริกซ์ได้หลายรูปแบบ
+
+รองรับเมทริกซ์หลายขนาด เพื่อให้ใช้งานได้ทั้งโจทย์พื้นฐานและโจทย์ที่ซับซ้อนมากขึ้น
+
+* 2×2
+* 3×3
+* 4×4
+* 5×5
+
+การเลือกขนาดเมทริกซ์ทำได้จากเมนูในหน้าเว็บ และระบบจะปรับช่องกรอกข้อมูลให้โดยอัตโนมัติ
+
+---
+
+### 3. ระบบกรอกเมทริกซ์แบบโต้ตอบ (Interactive Input)
+
+ผู้ใช้สามารถใส่ค่าของเมทริกซ์ได้โดยตรงผ่านช่องตัวเลขในหน้าเว็บ
+
+ฟีเจอร์ที่เกี่ยวข้อง ได้แก่
+
+* ช่องกรอกค่าทุกตำแหน่งในเมทริกซ์
+* ปุ่ม **Solve** เพื่อคำนวณคำตอบ
+* ปุ่ม **Clear** เพื่อล้างค่าทั้งหมดและเริ่มใหม่
+
+ช่วยให้สามารถทดลองค่าหลายชุดได้รวดเร็ว โดยไม่ต้องแก้โค้ดหรือใช้โปรแกรมอื่น
+
+---
+
+### 4. ชุดตัวอย่างโจทย์ (Testcases) พร้อมใช้งาน
+
+มีตัวอย่างระบบสมการที่เตรียมไว้ให้ทดลองได้ทันที เช่น
+
+* ระบบสมการขนาด 3×3
+* ระบบสมการขนาด 4×4
+* ตัวอย่างการหา Inverse
+* ตัวอย่างการแก้สมการพร้อมเมทริกซ์ผกผัน
+
+แต่ละ testcase จะใส่ค่าลงในเมทริกซ์ให้โดยอัตโนมัติ เพื่อให้ผู้ใช้สามารถกด Solve และดูผลลัพธ์ได้ทันที
+
+---
+
+## โครงสร้างโปรเจกต์ (ตัวอย่าง)
+
+```
+src/
+  components/
+  pages/
+  utils/
+README.md
+package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **components** – ส่วนของ UI เช่น ช่องกรอกเมทริกซ์ ปุ่ม และตัวเลือกวิธีคำนวณ
+* **pages** – หน้าแต่ละวิธีการคำนวณ
+* **utils** – ฟังก์ชันคำนวณทางคณิตศาสตร์
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## การใช้งานโดยย่อ
 
-## Learn More
+1. เลือกวิธีการคำนวณจากเมนู
+2. เลือกขนาดเมทริกซ์
+3. ใส่ค่าลงในเมทริกซ์
+4. กดปุ่ม **Solve** เพื่อดูผลลัพธ์
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ถ้าต้องการ ผมช่วยเขียน **README เต็มทั้งไฟล์** (มีภาพหน้าจอ, วิธีติดตั้ง, ลิงก์เดโม, เทคโนโลยีที่ใช้) ให้ดูเป็นโปรเจกต์พอร์ตมหาลัยหรือสมัครงานได้เลย.
