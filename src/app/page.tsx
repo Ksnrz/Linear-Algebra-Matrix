@@ -27,22 +27,63 @@ const formatNumber = (num: number | Fraction): string => {
     : fixed.replace(/\.?0+$/, "");
 };
 
-const presets = [
+type Preset = {
+  title: string;
+  description?: string;
+  method: "inverse" | "gaussElim" | "gaussJordan" | "lu" | "cramer";
+  size: number;
+  matrix: number[][];
+  bVector?: number[];
+};
+
+const presets: Preset[] = [
   {
     title: "Example 1: 3x3 System",
-    description: "2x1 + x2 + 3x3 = 1, 3x1 + 2x2 + x3 = 4, x1 - x2 + 2x3 = 3",
+    description: "3x3 system with unique solution.",
+    method: "gaussElim",
+    size: 3,
+    matrix: [
+      [2, 1, 3],
+      [4, 3, 5],
+      [6, 5, 5],
+    ],
+    bVector: [1, 1, -3],
   },
   {
     title: "Example 2: 4x4 System",
-    description: "Mixed coefficients, random right-hand side.",
+    description: "4x4 system",
+    method: "gaussElim",
+    size: 4,
+    matrix: [
+      [2, -1, -3, 1],
+      [1, 1, 1, -2],
+      [3, 2, -3, -4],
+      [-1, -4, 1, 1],
+    ],
+    bVector: [9, 10, 6, 6],
   },
   {
     title: "Example 3: Inverse of 3x3",
     description: "Find A^{-1} for a non-singular 3x3 matrix.",
+    method: "inverse",
+    size: 3,
+    matrix: [
+      [1, 2, -3],
+      [-1, 1, -1],
+      [0, -2, 3],
+    ]
   },
   {
     title: "Example 4: Solve Ax=b and A^{-1}",
     description: "Compute solution and inverse in one go.",
+    method: "inverse",
+    size: 3,
+    matrix: [
+      [1, 2, 3],
+      [-1, -1, -1],
+      [1, 2, 3],
+    ],
+    bVector: [5, 3, -1],
   },
 ];
 
