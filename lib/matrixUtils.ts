@@ -46,14 +46,14 @@ export const gaussianElimination = (A: Matrix, b: number[]): number[] => {
       }
     }
   }
-
+  // create x1, x2, ..., xn based on number of equations (store as array) [x, x, x]
   const x = Array.from({ length: n }, () => 0);
-  for (let i = n - 1; i >= 0; i -= 1) {
+  for (let i = n - 1; i >= 0; i -= 1) { // start from the bottom row, substitute upwards
     let sum = M[i][n];
     for (let j = i + 1; j < n; j += 1) {
-      sum -= M[i][j] * x[j];
+      sum -= M[i][j] * x[j]; // substitute known x[j] values
     }
-    x[i] = sum / M[i][i];
+    x[i] = sum / M[i][i]; // divide by the coefficient of the variable
   }
 
   return x;
