@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MatrixInput from "../../components/MatrixInput";
 import { type Matrix } from "../../lib/matrixUtils";
 import {
@@ -97,11 +97,6 @@ export default function Home() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [showSteps, setShowSteps] = useState(false);
 
-  useEffect(() => {
-    setMatrix(createMatrix(size));
-    setBVector(Array(size).fill(0));
-  }, [size]);
-
   const applyPreset = (preset: Preset) => {
     setMethod(preset.method);
     setSize(preset.size);
@@ -193,7 +188,7 @@ export default function Home() {
                   <label className='text-md text-slate-300 mr-3'>Matrix size</label>
                   <select
                     value={size}
-                    onChange={(e) => setSize(Number(e.target.value))}
+                    onChange={(e) => onSizeChange(Number(e.target.value))}
                     className="mt-2 rounded-lg border border-slate-800 bg-slate-950 px-4 py-2 text-slate-100 transition hover:border-emerald-300/40">
                     <option value="2">2x2</option>
                     <option value="3">3x3</option>
