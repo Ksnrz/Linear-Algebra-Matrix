@@ -190,7 +190,10 @@ export const cramersRuleWithSteps = (
   return { result, steps };
 };
 
-export const inverseMatrixWithSteps = (A: Matrix): SolverResult => {
+export const inverseMatrixWithSteps = (
+  A: Matrix,
+  b?: number[]
+): SolverResult => {
   const steps: Step[] = [];
 
   steps.push({
@@ -199,13 +202,30 @@ export const inverseMatrixWithSteps = (A: Matrix): SolverResult => {
     data: A,
   });
 
-  const result = inverseMatrix(A);
+  const inverse = inverseMatrix(A);
 
   steps.push({
     title: "Step 2: Inverse Matrix A⁻¹",
     description: "Computed using augmented matrix [A|I]",
-    data: result,
+    data: inverse,
   });
 
-  return { result, steps };
+  if (!b || b.length !== A.length) {
+    return { result: inverse, steps };
+  }
+
+  const solution = inverse.map((row) =>
+    row.reduce((sum, value, j) => sum + value * b[j], 0)
+  );
+
+  steps.push({
+    title: "Step 3: Solve Ax = b using x = A⁻¹b",
+    description: "Multiply inverse matrix by b vector",
+    data: solution,
+  });
+
+  return {
+    result: { inverse, solution },
+    steps,
+  };
 };

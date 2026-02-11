@@ -12,12 +12,24 @@ interface MatrixInputProps {
 export default function MatrixInput({ matrix, setMatrix, size, showB = false, bVector = [], setBVector }: MatrixInputProps) {
     // Local string inputs to allow intermediate values like '-' or '1.' while typing
     const [inputs, setInputs] = useState<string[][]>(() =>
-        matrix.map((row) => row.map((v) => (v === 0 ? '' : String(v))))
+        Array.from({ length: size }, (_, r) =>
+            Array.from({ length: size }, (_, c) => {
+                const v = matrix[r]?.[c] ?? 0;
+                return v === 0 ? '' : String(v);
+            })
+        )
     );
 
     useEffect(() => {
-        setInputs(matrix.map((row) => row.map((v) => (v === 0 ? '' : String(v)))));
-    }, [matrix]);
+        setInputs(
+            Array.from({ length: size }, (_, r) =>
+                Array.from({ length: size }, (_, c) => {
+                    const v = matrix[r]?.[c] ?? 0;
+                    return v === 0 ? '' : String(v);
+                })
+            )
+        );
+    }, [matrix, size]);
 
     const handleInputChange = (row: number, col: number, value: string) => {
         const newInputs = inputs.map((r) => [...r]);
@@ -33,11 +45,21 @@ export default function MatrixInput({ matrix, setMatrix, size, showB = false, bV
         // if parsed is NaN (e.g. '-' or ''), don't update numeric matrix yet
     };
 
-    const [bInputs, setBInputs] = useState<string[]>(() => (bVector || []).map((v) => (v === 0 ? '' : String(v))));
+    const [bInputs, setBInputs] = useState<string[]>(() =>
+        Array.from({ length: size }, (_, i) => {
+            const v = (bVector || [])[i] ?? 0;
+            return v === 0 ? '' : String(v);
+        })
+    );
 
     useEffect(() => {
-        setBInputs((bVector || []).map((v) => (v === 0 ? '' : String(v))));
-    }, [bVector]);
+        setBInputs(
+            Array.from({ length: size }, (_, i) => {
+                const v = (bVector || [])[i] ?? 0;
+                return v === 0 ? '' : String(v);
+            })
+        );
+    }, [bVector, size]);
 
     const handleBChange = (row: number, value: string) => {
         const newBInputs = [...bInputs];

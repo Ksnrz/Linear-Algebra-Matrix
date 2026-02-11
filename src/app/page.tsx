@@ -92,7 +92,10 @@ export default function Home() {
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState(createMatrix(3));
   const [bVector, setBVector] = useState<number[]>([0, 0, 0]);
-  const [result, setResult] = useState<Matrix | number[] | { L: Matrix; U: Matrix } | null>(null);
+  const [inputVersion, setInputVersion] = useState(0);
+  const [result, setResult] = useState<
+    Matrix | number[] | { L: Matrix; U: Matrix } | { inverse: Matrix; solution: number[] } | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
   const [showSteps, setShowSteps] = useState(false);
@@ -102,6 +105,7 @@ export default function Home() {
     setSize(preset.size);
     setMatrix(preset.matrix.map(row => [...row]));
     setBVector(preset.bVector ? [...preset.bVector] : Array(preset.size).fill(0));
+    setInputVersion((v) => v + 1);
     setResult(null);
     setError(null);
     setSteps([]);
@@ -112,6 +116,7 @@ export default function Home() {
     setSize(newSize);
     setMatrix(createMatrix(newSize));
     setBVector(Array(newSize).fill(0));
+    setInputVersion((v) => v + 1);
     setError(null);
   };
 
@@ -124,7 +129,7 @@ export default function Home() {
 
       switch (method) {
         case "inverse":
-          solverResult = inverseMatrixWithSteps(matrix);
+          solverResult = inverseMatrixWithSteps(matrix, bVector);
           break;
         case "gaussElim":
           solverResult = gaussianEliminationWithSteps(matrix, bVector);
@@ -198,7 +203,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-6">
-                <MatrixInput matrix={matrix} setMatrix={setMatrix} size={size} showB={method === 'gaussElim' || method === 'cramer' || method === 'lu' || method === 'gaussJordan'} bVector={bVector} setBVector={setBVector} />
+                <MatrixInput key={inputVersion} matrix={matrix} setMatrix={setMatrix} size={size} showB={method === 'gaussElim' || method === 'cramer' || method === 'lu' || method === 'gaussJordan' || method === 'inverse'} bVector={bVector} setBVector={setBVector} />
               </div>
 
               <button
@@ -327,6 +332,40 @@ export default function Home() {
                                     {formatNumber(val)}
                                   </span>
                                 ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : typeof result === 'object' && result !== null && 'inverse' in result && 'solution' in result ? (
+                      <div>
+                        <div className="mb-4">
+                          <p className="mb-2 text-xs text-slate-400">Inverse Matrix (A⁻¹):</p>
+                          <table className="w-full border-collapse text-xs">
+                            <tbody>
+                              {result.inverse.map((row, i) => (
+                                <tr key={i}>
+                                  {row.map((val, j) => (
+                                    <td key={j} className="border border-slate-600 px-2 py-1 text-right font-mono text-emerald-300">
+                                      {formatNumber(val)}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div>
+                          <p className="mb-2 text-xs text-slate-400">Solution Vector (x = A⁻¹b):</p>
+                          <div className="flex flex-wrap gap-2">
+                            {result.solution.map((val, i) => (
+                              <div
+                                key={i}
+                                className="rounded border border-slate-600 bg-slate-950 px-3 py-2 text-right">
+                                <p className="text-xs text-slate-400">x{i + 1}</p>
+                                <p className="font-mono text-xl text-emerald-300 font-semibold">
+                                  {formatNumber(val)}
+                                </p>
                               </div>
                             ))}
                           </div>
