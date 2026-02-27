@@ -18,19 +18,26 @@ import {
   gaussJordanWithFractions,
   extractSolutionFromRREFFractions,
   extractSolutionFromREFFractions,
+  classifyAugmentedSystemFractions,
   type FractionEliminationStep,
+  type SystemClassification,
 } from "./fractionElimination";
 import { Fraction, type FractionMatrix } from "./fractions";
 
 export type Step = {
   title: string;
   description: string;
-  data?: Matrix | number[] | FractionMatrix | Fraction[];
+  data?: Matrix | number[] | FractionMatrix | Fraction[] | SystemStatusResult;
 };
 
 export type SolverResult = {
   result: any;
   steps: Step[];
+};
+
+export type SystemStatusResult = {
+  status: SystemClassification;
+  message: string;
 };
 
 export const gaussianEliminationWithSteps = (
@@ -44,7 +51,17 @@ export const gaussianEliminationWithSteps = (
   const { result: refMatrix, steps: elimSteps } = gaussianEliminationWithFractions(augmented);
 
   // Extract solution via back substitution
-  const solution = extractSolutionFromREFFractions(refMatrix);
+  const classification = classifyAugmentedSystemFractions(refMatrix);
+  const solution =
+    classification === "unique"
+      ? extractSolutionFromREFFractions(refMatrix)
+      : ({
+          status: classification,
+          message:
+            classification === "none"
+              ? "No solution (inconsistent system)."
+              : "Infinite solutions (dependent system).",
+        } as SystemStatusResult);
 
   // Convert elimination steps to Step format
   const steps: Step[] = elimSteps.map((elimStep: FractionEliminationStep) => ({
@@ -56,7 +73,10 @@ export const gaussianEliminationWithSteps = (
   // Add final solution step
   steps.push({
     title: "Solution",
-    description: "Back substitution complete - final solution",
+    description:
+      classification === "unique"
+        ? "Back substitution complete - final solution"
+        : (solution as SystemStatusResult).message,
     data: solution,
   });
 
@@ -74,7 +94,17 @@ export const gaussJordanWithSteps = (
   const { result: rrefMatrix, steps: elimSteps } = gaussJordanWithFractions(augmented);
 
   // Extract solution from RREF (last column)
-  const solution = extractSolutionFromRREFFractions(rrefMatrix);
+  const classification = classifyAugmentedSystemFractions(rrefMatrix);
+  const solution =
+    classification === "unique"
+      ? extractSolutionFromRREFFractions(rrefMatrix)
+      : ({
+          status: classification,
+          message:
+            classification === "none"
+              ? "No solution (inconsistent system)."
+              : "Infinite solutions (dependent system).",
+        } as SystemStatusResult);
 
   // Convert elimination steps to Step format
   const steps: Step[] = elimSteps.map((elimStep: FractionEliminationStep) => ({
@@ -86,7 +116,10 @@ export const gaussJordanWithSteps = (
   // Add final solution step
   steps.push({
     title: "Solution",
-    description: "Gauss-Jordan elimination complete - solution extracted from RREF",
+    description:
+      classification === "unique"
+        ? "Gauss-Jordan elimination complete - solution extracted from RREF"
+        : (solution as SystemStatusResult).message,
     data: solution,
   });
 

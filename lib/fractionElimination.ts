@@ -17,6 +17,8 @@ export type FractionEliminationResult = {
   steps: FractionEliminationStep[];
 };
 
+export type SystemClassification = "unique" | "infinite" | "none";
+
 /**
  * Format Fraction for display in operations
  */
@@ -224,4 +226,29 @@ export const extractSolutionFromREFFractions = (refMatrix: FractionMatrix): Frac
   }
 
   return solution;
+};
+
+/**
+ * Classify an augmented matrix as unique, infinite, or no solution.
+ */
+export const classifyAugmentedSystemFractions = (
+  matrix: FractionMatrix
+): SystemClassification => {
+  const rows = matrix.length;
+  const cols = matrix[0]?.length ?? 0;
+
+  let rankA = 0;
+  let rankAugmented = 0;
+
+  for (let i = 0; i < rows; i++) {
+    const hasCoeff = matrix[i].slice(0, cols - 1).some((v) => !v.isNearZero());
+    const hasAny = matrix[i].some((v) => !v.isNearZero());
+
+    if (hasCoeff) rankA++;
+    if (hasAny) rankAugmented++;
+  }
+
+  if (rankA < rankAugmented) return "none";
+  if (rankA < cols - 1) return "infinite";
+  return "unique";
 };

@@ -10,6 +10,7 @@ import {
   inverseMatrixWithSteps,
   type Step,
   type SolverResult,
+  type SystemStatusResult,
 } from "../../lib/solverWithSteps";
 import { Fraction, type FractionMatrix } from "../../lib/fractions";
 
@@ -94,7 +95,7 @@ export default function Home() {
   const [bVector, setBVector] = useState<number[]>([0, 0, 0]);
   const [inputVersion, setInputVersion] = useState(0);
   const [result, setResult] = useState<
-    Matrix | number[] | { L: Matrix; U: Matrix } | { inverse: Matrix; solution: number[] } | null
+    Matrix | number[] | { L: Matrix; U: Matrix } | { inverse: Matrix; solution: number[] } | SystemStatusResult | null
   >(null);
   const [error, setError] = useState<string | null>(null);
   const [steps, setSteps] = useState<Step[]>([]);
@@ -305,6 +306,14 @@ export default function Home() {
                             </div>
                           ))}
                         </div>
+                      </div>
+                    ) : typeof result === 'object' && result !== null && 'status' in result && 'message' in result ? (
+                      <div className={`rounded-lg border p-4 text-sm ${
+                        result.status === "none"
+                          ? "border-red-500 bg-red-500/10 text-red-300"
+                          : "border-amber-500 bg-amber-500/10 text-amber-300"
+                      }`}>
+                        {result.message}
                       </div>
                     ) : typeof result === 'object' && result !== null && 'L' in result && 'U' in result ? (
                       <div>
