@@ -46,6 +46,7 @@ export const gaussianElimination = (A: Matrix, b: number[]): number[] => {
       }
     }
   }
+  // Back substitution
   // create x1, x2, ..., xn based on number of equations (store as array) [x, x, x]
   const x = Array.from({ length: n }, () => 0);
   for (let i = n - 1; i >= 0; i -= 1) { // start from the bottom row, substitute upwards
@@ -55,7 +56,6 @@ export const gaussianElimination = (A: Matrix, b: number[]): number[] => {
     }
     x[i] = sum / M[i][i]; // divide by the coefficient of the variable
   }
-
   return x;
 };
 
@@ -64,35 +64,36 @@ export const gaussJordan = (A: Matrix, b?: number[]): Matrix => {
   const M = clone(A);
   const rows = M.length;
   const cols = M[0]?.length ?? 0;
-
+  // create augmented matrix [A | b] if b exists
   if (b) {
     for (let i = 0; i < rows; i += 1) {
       M[i].push(b[i]);
     }
   }
 
-  let lead = 0;
-  for (let r = 0; r < rows; r += 1) {
-    if (lead >= cols) break;
+  let lead = 0; // current pivot column
+  for (let r = 0; r < rows; r += 1) { // iterate through each row
+    if (lead >= cols) break; // stop if no columns left for pivot
 
     let i = r;
     while (Math.abs(M[i][lead]) < EPS) {
       i += 1;
       if (i === rows) {
-        i = r;
-        lead += 1;
+        i = r;            // reset search to current row
+        lead += 1;        // move to next column
         if (lead === cols) return M;
       }
     }
     if (i !== r) swapRows(M, i, r);
 
+    // normalize pivot row → make pivot = 1
     const pivot = M[r][lead];
     for (let j = 0; j < M[r].length; j += 1) {
       M[r][j] /= pivot;
     }
 
     for (let k = 0; k < rows; k += 1) {
-      if (k === r) continue;
+      if (k === r) continue; // skip delete pivot 
       const factor = M[k][lead];
       for (let j = 0; j < M[k].length; j += 1) {
         M[k][j] -= factor * M[r][j];
@@ -215,7 +216,7 @@ const determinant = (A: Matrix): number => {
         pivotRow = i;
       }
     }
-    if (maxVal < EPS) return 0;
+    if (maxVal < EPS) return 0;   // matrix is singular
     if (pivotRow !== k) {
       swapRows(M, k, pivotRow);
       swaps += 1;
